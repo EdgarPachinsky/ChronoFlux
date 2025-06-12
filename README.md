@@ -1,27 +1,50 @@
-# ChronoFlux
+# ⏱️ ChronoFlux - Interactive Physics Particle Simulator
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 18.2.4.
+ChronoFlux is an advanced, interactive particle simulator built in Angular + Canvas. Designed for visualizing and experimenting with real-world physics principles, it allows users to manipulate forces, observe motion in real time, and tweak simulation parameters through a beautiful and intuitive UI.
 
-## Development server
+## 🧠 Core Concept
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+At its heart, ChronoFlux is a playground for forces. It simulates particle motion under the influence of:
 
-## Code scaffolding
+- Gravity
+- Wind
+- Air Resistance (Drag)
+- Surface Elasticity (Bounciness)
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+The simulator is highly interactive, ideal for both educational use and physics experimentation.
 
-## Build
+---
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+## 🚀 Features
 
-## Running unit tests
+### 🎯 Particle Dynamics
+- **Real-time particle motion** under force influence
+- **Mass unit toggle** (grams ↔ kilograms)
+- **Velocity vectors**, **acceleration arrows**, and **net force visualization**
+- **Elastic collisions** with boundary walls
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+### 🛠 Force Customization
+- **Gravity**: Customize direction, magnitude, and color
+- **Wind**: Apply lateral force to all particles
+- **Air Resistance**: Simulated using quadratic drag (F ∝ v²)
+- **Surface Elasticity**: Controls how much energy is retained after collision
+- **Friction**: Applied only when particle is at rest on a surface (optional)
 
-## Running end-to-end tests
+### 📊 Simulation Controls
+- **Delta Time slider**: Change simulation time step (affects resolution/speed)
+- **Play / Pause** and **Step-by-step iteration**
+- **Visual timeline** of simulation frames (planned)
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+### ⚙️ Technical Stack
+- **Angular** (Reactive Forms for all controls)
+- **Canvas 2D** (rendering engine)
 
-## Further help
+---
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+## 📦 Installation
+
+```bash
+git clone https://github.com/your-username/chronoflux.git
+cd chronoflux
+npm install
+npm start
