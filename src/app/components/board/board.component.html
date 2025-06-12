@@ -1,0 +1,33 @@
+<div class="board-container">
+  <div>
+    <canvas
+      [attr.width]="BOARD_CONSTANTS.width"
+      [attr.height]="BOARD_CONSTANTS.height"
+      (click)="settingsService.handleCanvasClick($event)"
+      #mainCanvas></canvas>
+  </div>
+  <div class="border bottom">
+    @for (loopItem of generateRange(loopCountTopBottom); track loopItem){
+      <div class="density-element bottom" [style.left.px]="loopItem * 10"></div>
+    }
+  </div>
+
+  <div class="border top">
+    @for (loopItem of generateRange(loopCountTopBottom); track loopItem){
+      <div class="density-element top" [style.left.px]="loopItem * 10"></div>
+    }
+  </div>
+
+
+  <div class="border left">
+    @for (loopItem of generateRange(loopCountLeftRight); track loopItem){
+      <div class="density-element left" [style.top.px]="loopItem * 10"></div>
+    }
+  </div>
+
+  <div class="border right">
+    @for (loopItem of generateRange(loopCountLeftRight); track loopItem){
+      <div class="density-element right" [style.top.px]="loopItem * 10"></div>
+    }
+  </div>
+</div>

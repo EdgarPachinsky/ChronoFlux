@@ -1,0 +1,55 @@
+canvas#main-canvas {
+  display: block;
+}
+
+.board-container{
+  position: relative;
+
+
+  .border{
+    position: absolute;
+    width: 100%;
+    height: 1px;
+    background: #ffffff;
+
+    &.bottom{
+      bottom: 5px;
+    }
+    &.top{
+      top: 0;
+    }
+    &.left{
+      height: 99%;
+      width: 1px;
+      left: 0;
+      top: 0;
+    }
+    &.right{
+      height: 99%;
+      width: 1px;
+      right: 0;
+      top: 0;
+    }
+
+    .density-element{
+      position: absolute;
+      width: 1px;
+      height: 6px;
+      background: #ffffff;
+      transform: rotate(45deg);
+
+      &.bottom{
+        bottom: -5px;
+      }
+      &.top{
+        top: -5px;
+      }
+      &.left{
+        left: -2px;
+      }
+      &.right{
+        right: -2px;
+      }
+    }
+  }
+}
