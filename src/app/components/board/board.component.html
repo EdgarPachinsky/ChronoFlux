@@ -3,6 +3,9 @@
     <canvas
       [attr.width]="BOARD_CONSTANTS.width"
       [attr.height]="BOARD_CONSTANTS.height"
+      (mousemove)="settingsService.handleCanvasMouseMove($event)"
+      (mousedown)="settingsService.handleCanvasMouseDown($event)"
+      (mouseup)="settingsService.handleCanvasMouseUp($event)"
       (click)="settingsService.handleCanvasClick($event)"
       #mainCanvas></canvas>
   </div>

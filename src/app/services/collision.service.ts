@@ -1,12 +1,28 @@
 import {Injectable} from "@angular/core";
 import {Particle} from "../classes/Particle";
+import {SettingsService} from "./settings.service";
+import {BOARD_CONSTANTS} from "../constants/board.constant";
 
 @Injectable({
   providedIn: 'root'
 })
 export class CollisionService {
 
-  constructor() {
+  constructor(
+    // public settingsService:SettingsService,
+  ) {
+  }
+
+  checkAndResolveCollision(particle: Particle, particles: Particle[]){
+    let otherParticles = particles.filter((_particle: Particle) => _particle.id !== particle.id)
+
+    let collisionWith = this.checkCollisionWithOtherParticles(particle, otherParticles);
+
+    if(collisionWith.length){
+      collisionWith.forEach((collisionWithEl) => {
+        this.resolveCollision(particle, collisionWithEl)
+      })
+    }
   }
 
   checkCollisionWithOtherParticles(
@@ -90,5 +106,22 @@ export class CollisionService {
     p1.y -= correction * ny;
     p2.x += correction * nx;
     p2.y += correction * ny;
+
+
+    if (p2.x - p2.radius < 0) {
+      p2.x = p2.radius;
+      p2.vx *= -1;
+    } else if (p2.x + p2.radius > BOARD_CONSTANTS.width) {
+      p2.x = BOARD_CONSTANTS.width - p2.radius;
+      p2.vx *= -1;
+    }
+
+    if (p2.y - p2.radius < 0) {
+      p2.y = p2.radius;
+      p2.vy *= -1;
+    } else if (p2.y + p2.radius > BOARD_CONSTANTS.height) {
+      p2.y = BOARD_CONSTANTS.height - p2.radius;
+      p2.vy *= -1;
+    }
   }
 }

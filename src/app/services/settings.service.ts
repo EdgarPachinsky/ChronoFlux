@@ -5,6 +5,8 @@ import {Particle} from "../classes/Particle";
 import {FormControl, Validators} from "@angular/forms";
 import {MatSnackBar} from "@angular/material/snack-bar";
 import {Vector} from "../classes/Vector";
+import {CollisionService} from "./collision.service";
+import {BOARD_CONSTANTS} from "../constants/board.constant";
 
 @Injectable({
   providedIn: 'root'
@@ -30,11 +32,17 @@ export class SettingsService {
 
   public isShiftKeyPressed: boolean = false;
 
+  public replacingParticle:Particle | undefined = undefined;
+  public draggingX!: number
+  public draggingY!: number
+
+
   public get newParticleRadius () {
     return Number(this.particleRadiusControl.value)
   }
 
   constructor(
+    public collisionService: CollisionService,
     public canvasService: CanvasService,
     public matSnackBar: MatSnackBar,
   ) { }
@@ -59,13 +67,60 @@ export class SettingsService {
     return null;
   }
 
+  handleCanvasMouseMove(event: MouseEvent) {
+    if(!this.replacingParticle){
+      return;
+    }
+
+    const { xRelative, yRelative } = this.findRelativeXY(event)
+
+    this.draggingX = xRelative;
+    this.draggingY = yRelative;
+
+    this.replacingParticle.x = this.draggingX;
+    this.replacingParticle.y = this.draggingY;
+
+    this.particlePositionFix(this.replacingParticle)
+
+
+    this.particles.forEach((particle) => {
+      this.collisionService.checkAndResolveCollision(particle, this.particles)
+    })
+
+    this.canvasService.drawParticlesOnCanvas(this.particles)
+    this.saveToLocalStorage();
+  }
+
+  handleCanvasMouseUp(
+    event: MouseEvent | undefined = undefined,
+  ){
+    if(this.replacingParticle){
+      setTimeout(() => {
+        this.replacingParticle = undefined;
+      },100)
+    }
+  }
+
+  handleCanvasMouseDown(
+    event: MouseEvent | undefined = undefined,
+  ){
+    const { xRelative, yRelative } = this.findRelativeXY(event)
+
+    let onParticle = this.findParticle(xRelative, yRelative);
+
+    if(onParticle){
+      this.replacingParticle = onParticle;
+    }
+  }
+
   handleCanvasClick(
       event: MouseEvent | undefined = undefined,
       pointsFromRandomGenerator: IParticle | undefined = undefined
     ){
-    if(!event){
+    if(!event || this.replacingParticle){
       return;
     }
+
     if(!this.particleMassControl.valid){
       this.matSnackBar.open('Mass in not set to proper value');
       return;
@@ -75,15 +130,7 @@ export class SettingsService {
       return;
     }
 
-
-    const rect = this.canvasService.canvasHTMLRef.nativeElement.getBoundingClientRect();
-    const scaleX = this.canvasService.canvasHTMLRef.nativeElement.width / rect.width;
-    const scaleY = this.canvasService.canvasHTMLRef.nativeElement.height / rect.height;
-
-    // Calculate X coordinate relative to canvas's internal drawing surface
-    const xRelative = (event.clientX - rect.left) * scaleX;
-    // Calculate Y coordinate relative to canvas's internal drawing surface
-    const yRelative = (event.clientY - rect.top) * scaleY;
+    const { xRelative, yRelative } = this.findRelativeXY(event)
 
     let onParticle = this.findParticle(xRelative, yRelative);
 
@@ -176,5 +223,43 @@ export class SettingsService {
     if (value === 0.016) return 'Real-time (1x)';
     if (value < 0.016) return `Slow-motion (${(0.016 / value).toFixed(1)}x slower)`;
     return `Faster (${(value / 0.016).toFixed(1)}x speed)`;
+  }
+
+  findRelativeXY(
+    event: MouseEvent | undefined = undefined,
+  ): {xRelative:number, yRelative:number} {
+    if(!event){
+      return {xRelative:-1, yRelative:-1};
+    }
+
+    const rect = this.canvasService.canvasHTMLRef.nativeElement.getBoundingClientRect();
+    const scaleX = this.canvasService.canvasHTMLRef.nativeElement.width / rect.width;
+    const scaleY = this.canvasService.canvasHTMLRef.nativeElement.height / rect.height;
+
+    // Calculate X coordinate relative to canvas's internal drawing surface
+    const xRelative = (event.clientX - rect.left) * scaleX;
+    // Calculate Y coordinate relative to canvas's internal drawing surface
+    const yRelative = (event.clientY - rect.top) * scaleY;
+
+    return { xRelative, yRelative }
+  }
+
+  particlePositionFix(particle: Particle, customSurfaceElasticityValue:number | undefined= undefined){
+    if (particle.x - particle.radius < 0) { // Check left wall
+      particle.x = particle.radius;        // Reposition to just touch the wall
+      particle.vx *= -(customSurfaceElasticityValue || Number(this.surfaceElasticityControl.value) || 1);                 // Reverse velocity with bounce factor
+    } else if (particle.x + particle.radius > BOARD_CONSTANTS.width) { // Check right wall
+      particle.x = BOARD_CONSTANTS.width - particle.radius; // Reposition to just touch the wall
+      particle.vx *= -(customSurfaceElasticityValue || Number(this.surfaceElasticityControl.value) || 1);                                   // Reverse velocity
+    }
+
+    // For Y-axis boundaries
+    if (particle.y - particle.radius < 0) { // Check top wall
+      particle.y = particle.radius;        // Reposition
+      particle.vy *= -(customSurfaceElasticityValue || Number(this.surfaceElasticityControl.value) || 1);                 // Reverse velocity
+    } else if (particle.y + particle.radius > BOARD_CONSTANTS.height) { // Check bottom wall
+      particle.y = BOARD_CONSTANTS.height - particle.radius; // Reposition
+      particle.vy *= -(customSurfaceElasticityValue || Number(this.surfaceElasticityControl.value) || 1);                                    // Reverse velocity
+    }
   }
 }

@@ -85,14 +85,7 @@ export class GravityService {
 
         let dragForce = new Vector(dragX, dragY, String(this.settingsService.airResistanceColorControl.value), 'F Air Resistance');
 
-
-        let collisionWith = this.collisionService.checkCollisionWithOtherParticles(particle, otherParticles)
-
-        if(collisionWith.length){
-          collisionWith.forEach((collisionWithEl) => {
-            this.collisionService.resolveCollision(particle, collisionWithEl)
-          })
-        }
+        this.collisionService.checkAndResolveCollision(particle, otherParticles)
 
         let totalForce = new Vector(
           dragForce.x + gravityForce.x + windForce.x,
@@ -118,32 +111,16 @@ export class GravityService {
         particle.x += particle.vx * Number(this.settingsService.deltaTimeControl.value);
         particle.y += particle.vy * Number(this.settingsService.deltaTimeControl.value);
 
-        if (this.isRestingOnFloor(particle)) {
-          particle.vx = 0;
-          particle.vy = 0;
+        // if (this.isRestingOnFloor(particle)) {
+        //   particle.vx = 0;
+        //   particle.vy = 0;
+        //
+        //   // Optional: stop gravity or mark as "rested"
+        //   particle.isAtRest = true;
+        //   return; // skip this particle
+        // }
 
-          // Optional: stop gravity or mark as "rested"
-          particle.isAtRest = true;
-          return; // skip this particle
-        }
-
-        // For X-axis boundaries
-        if (particle.x - particle.radius < 0) { // Check left wall
-          particle.x = particle.radius;        // Reposition to just touch the wall
-          particle.vx *= -(Number(this.settingsService.surfaceElasticityControl.value));                 // Reverse velocity with bounce factor
-        } else if (particle.x + particle.radius > BOARD_CONSTANTS.width) { // Check right wall
-          particle.x = BOARD_CONSTANTS.width - particle.radius; // Reposition to just touch the wall
-          particle.vx *= -(Number(this.settingsService.surfaceElasticityControl.value));                                   // Reverse velocity
-        }
-
-        // For Y-axis boundaries
-        if (particle.y - particle.radius < 0) { // Check top wall
-          particle.y = particle.radius;        // Reposition
-          particle.vy *= -(Number(this.settingsService.surfaceElasticityControl.value));                 // Reverse velocity
-        } else if (particle.y + particle.radius > BOARD_CONSTANTS.height) { // Check bottom wall
-          particle.y = BOARD_CONSTANTS.height - particle.radius; // Reposition
-          particle.vy *= -(Number(this.settingsService.surfaceElasticityControl.value));                                    // Reverse velocity
-        }
+        this.settingsService.particlePositionFix(particle);
       })
       this.canvasService.drawParticlesOnCanvas(particles);
 
@@ -152,7 +129,6 @@ export class GravityService {
 
     this.animationId = requestAnimationFrame(animateLayout);
   }
-
 
 
   pauseGravityAnimation() {
