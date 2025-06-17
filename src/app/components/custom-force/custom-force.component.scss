@@ -1,0 +1,14 @@
+.custom-force-card{
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  border-radius: 10px;
+  border: 2px solid #222222;
+
+  .custom-force-color{
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+}

@@ -1,17 +1,23 @@
 import {IVector} from "../models/vector.model";
+import {SharedFunctional} from "./Shared-Functional";
 
-export class Vector implements IVector{
+export class Vector extends SharedFunctional implements IVector{
+  public id: string;
   public x: number;
   public y: number;
   public color: string;
   public forceName: string;
   public showArrowInMiniParticle: boolean = true;
+  public isActive: boolean = false;
 
-  constructor(x = 0, y = 0, color = '', forceName = '') {
+  constructor(id = '', x = 0, y = 0, color = '', forceName = '', isActive: boolean = false) {
+    super();
+    this.id = id || this.generateSecureId(10);
     this.x = x;
     this.y = y;
     this.color = color;
     this.forceName = forceName;
+    this.isActive = isActive;
   }
 
   get magnitude(): number { // Add magnitude for arrow length

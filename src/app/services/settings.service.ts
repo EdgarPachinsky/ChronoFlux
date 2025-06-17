@@ -1,12 +1,13 @@
-import {ElementRef, Injectable} from '@angular/core';
+import {ChangeDetectorRef, ElementRef, Injectable} from '@angular/core';
 import {IParticle} from "../models/particle.model";
 import {CanvasService} from "./canvas.service";
 import {Particle} from "../classes/Particle";
-import {FormControl, Validators} from "@angular/forms";
+import {FormControl, FormGroup, Validators} from "@angular/forms";
 import {MatSnackBar} from "@angular/material/snack-bar";
 import {Vector} from "../classes/Vector";
 import {CollisionService} from "./collision.service";
 import {BOARD_CONSTANTS} from "../constants/board.constant";
+import {Pulse} from "../classes/Pulse";
 
 @Injectable({
   providedIn: 'root'
@@ -14,7 +15,10 @@ import {BOARD_CONSTANTS} from "../constants/board.constant";
 export class SettingsService {
 
   public counter = 1;
-  public particles: Particle[]= [];
+  public particles: Particle[] = [];
+  public customForces: Vector[] = [];
+  public pulsePoints: Pulse[] = [];
+  public gravityPoints: Vector[] = [];
 
   public particleRadiusControl = new FormControl(15, [Validators.min(10)])
   public particleMassControl = new FormControl(1000, [Validators.min(10)])
@@ -26,9 +30,66 @@ export class SettingsService {
   public particleColorControl = new FormControl('#000000', [])
 
   public windForceColorControl = new FormControl('#ffffff', [])
+  public windForceStatusControl = new FormControl(false, [])
   public gravityColorControl = new FormControl('#ff0000', [])
+  public gravityStatusControl = new FormControl(true, [])
   public airResistanceColorControl = new FormControl('#77d6ff', [])
+  public airResistanceStatusControl = new FormControl(true, [])
   public totalForceColorControl = new FormControl('#00796b', [])
+
+  public customForceXControl = new FormControl(0, [Validators.required]);
+  public customForceYControl = new FormControl(0, [Validators.required]);
+  public customForceColorControl = new FormControl('#1b00ff', []);
+  public customForceNameControl = new FormControl('', [Validators.required]);
+
+  public customForceForm = new FormGroup(
+    {
+      'x': this.customForceXControl,
+      'y': this.customForceYControl,
+      'color': this.customForceColorControl,
+      'name': this.customForceNameControl,
+    }
+  )
+  public temporaryVector =
+    new Vector('',
+      Number(this.customForceXControl.value),
+      Number(this.customForceYControl.value),
+      String(this.customForceColorControl.value),
+      String(this.customForceNameControl.value)
+    )
+
+  public isIsInPulsePointAddMode = new FormControl(false, [Validators.required]);
+  public pulseIdControl = new FormControl('', [Validators.required]);
+  public pulseXControl = new FormControl(0, [Validators.required]);
+  public pulseYControl = new FormControl(0, []);
+  public pulseMaxRadiusControl = new FormControl(0, [Validators.required]);
+  public pulsePowerControl = new FormControl(0, [Validators.required]);
+  public pulseColorControl = new FormControl('#ff0000', [Validators.required]);
+  public pulseDurationControl = new FormControl(0, [Validators.required]);
+  // public pulseApplyOnControl = new FormControl([], [Validators.required]);
+
+  public customPulseForm = new FormGroup(
+    {
+      'x': this.pulseXControl,
+      'y': this.pulseYControl,
+      'maxRadius': this.pulseMaxRadiusControl,
+      'power': this.pulsePowerControl,
+      'color': this.pulseColorControl,
+      'duration': this.pulseDurationControl,
+      // 'applyOn': this.pulseApplyOnControl,
+    }
+  )
+  public temporaryPulsePoint = new Pulse(
+    '',
+    Number(this.pulseXControl.value),
+    Number(this.pulseYControl.value),
+    Number(this.pulseMaxRadiusControl.value),
+    Number(this.pulsePowerControl.value),
+    String(this.pulseColorControl.value),
+    Number(this.pulseDurationControl.value),
+    0,
+    // this.pulseApplyOnControl.value as any,
+  )
 
   public isShiftKeyPressed: boolean = false;
 
@@ -45,7 +106,9 @@ export class SettingsService {
     public collisionService: CollisionService,
     public canvasService: CanvasService,
     public matSnackBar: MatSnackBar,
-  ) { }
+  ) {
+
+  }
 
   initializeCanvas(
     canvasContext: CanvasRenderingContext2D,
@@ -87,7 +150,7 @@ export class SettingsService {
       this.collisionService.checkAndResolveCollision(particle, this.particles)
     })
 
-    this.canvasService.drawParticlesOnCanvas(this.particles)
+    this.canvasService.drawParticlesOnCanvas(this.particles, this.pulsePoints)
     this.saveToLocalStorage();
   }
 
@@ -134,10 +197,20 @@ export class SettingsService {
 
     let onParticle = this.findParticle(xRelative, yRelative);
 
+
+    if(this.isIsInPulsePointAddMode.value && !onParticle){
+
+      this.pulseXControl.patchValue(xRelative);
+      this.pulseYControl.patchValue(yRelative);
+
+      // this.addCustomPulsePoint();
+      return;
+    }
+
     if(this.isShiftKeyPressed && onParticle){
       this.particles = this.particles.filter((particle) => particle.id !== onParticle.id);
       this.saveToLocalStorage();
-      this.canvasService.drawParticlesOnCanvas(this.particles);
+      this.canvasService.drawParticlesOnCanvas(this.particles, this.pulsePoints);
       return;
     }
 
@@ -157,7 +230,7 @@ export class SettingsService {
       // this  will reset particles error high light
       setTimeout(() => {
         this.particles = this.particles.map((particle) => { particle.highLightError = false; return particle })
-        this.canvasService.drawParticlesOnCanvas(this.particles)
+        this.canvasService.drawParticlesOnCanvas(this.particles, this.pulsePoints)
       },100)
     }else{
       console.log(`No Overlap`)
@@ -170,14 +243,14 @@ export class SettingsService {
     }
 
     this.saveToLocalStorage();
-    this.canvasService.drawParticlesOnCanvas(this.particles);
+    this.canvasService.drawParticlesOnCanvas(this.particles, this.pulsePoints);
   }
 
   clearAllParticles(){
     this.counter = 1;
     this.particles = [];
     this.saveToLocalStorage();
-    this.canvasService.drawParticlesOnCanvas([])
+    this.canvasService.drawParticlesOnCanvas([], this.pulsePoints)
   }
 
   loadLocalParticlesAndDraw(){
@@ -188,17 +261,49 @@ export class SettingsService {
         return new Particle(particle.id, particle.x, particle.y, particle.radius, particle.mass, particle.massUnit, particle.category, particle.color)
       })
 
-      this.canvasService.drawParticlesOnCanvas(this.particles)
+      this.canvasService.drawParticlesOnCanvas(this.particles, this.pulsePoints)
       this.counter = this.particles.length + 1;
     }
+  }
+
+  loadLocalCustomForces(){
+    let localForces = localStorage.getItem('forces');
+
+    if(localForces){
+      this.customForces = JSON.parse(localForces);
+
+      this.customForces = this.customForces.map((force) => {
+        return new Vector(force.id, force.x, force.y, force.color, force.forceName, force.isActive);
+      })
+    }
+  }
+
+  loadLocalPulsePoints(){
+    let localPulsePoints = localStorage.getItem('pulsePoints');
+
+    if(localPulsePoints){
+      this.pulsePoints = JSON.parse(localPulsePoints);
+
+      this.pulsePoints = this.pulsePoints.map((pulse) => {
+
+        this.canvasService.drawPulsePoint(pulse.x, pulse.y,pulse.color)
+        return new Pulse(
+          pulse.id, pulse.x, pulse.y, pulse.maxRadius, pulse.power, pulse.color, pulse.duration, 0 , pulse.isActive);
+      })
+    }
+  }
+
+
+  saveForcesToLocalStorage(){
+    localStorage.setItem('forces', JSON.stringify(this.customForces));
   }
 
   saveToLocalStorage(){
     localStorage.setItem('particles', JSON.stringify(this.particles));
   }
 
-  setVisibilityForForce(particle: Particle, force: Vector){
-
+  savePulsePointsLocalStorage(){
+    localStorage.setItem('pulsePoints', JSON.stringify(this.pulsePoints));
   }
 
   getSurfaceElasticityLabel(value: number){
@@ -261,5 +366,69 @@ export class SettingsService {
       particle.y = BOARD_CONSTANTS.height - particle.radius; // Reposition
       particle.vy *= -(customSurfaceElasticityValue || Number(this.surfaceElasticityControl.value) || 1);                                    // Reverse velocity
     }
+  }
+
+  addCustomForce(){
+    if(this.customForceForm.invalid){
+      this.customForceForm.markAsTouched();
+      return;
+    }
+
+    this.customForces.push(
+      new Vector(
+        '',
+        this.temporaryVector.x,
+        this.temporaryVector.y,
+        this.temporaryVector.color,
+        this.temporaryVector.forceName,
+      )
+    )
+
+    this.customForceXControl.setValue(0)
+    this.customForceYControl.setValue(0)
+    this.customForceColorControl.setValue('#1b00ff')
+    this.customForceNameControl.setValue('')
+
+    this.saveForcesToLocalStorage();
+  }
+
+  deleteCustomForce(id:string){
+    this.customForces = this.customForces.filter((force) => {
+      return force.id !== id;
+    })
+
+    this.saveForcesToLocalStorage();
+  }
+
+  deletePulsePoint(id:string){
+    this.pulsePoints = this.pulsePoints.filter((pulse) => {
+      return pulse.id !== id;
+    })
+
+    this.canvasService.drawParticlesOnCanvas(this.particles, this.pulsePoints)
+    this.savePulsePointsLocalStorage();
+  }
+
+
+  addCustomPulsePoint(){
+    let newPulse = new Pulse(
+      '',
+      this.pulseXControl.value!,
+      this.pulseYControl.value!,
+      this.pulseMaxRadiusControl.value!,
+      this.pulsePowerControl.value!,
+      this.pulseColorControl.value!,
+      this.pulseDurationControl.value!,
+      // this.pulseApplyOnControl.value!
+    )
+    this.pulsePoints.push(
+      newPulse
+    )
+
+    this.customPulseForm.reset();
+    this.pulseColorControl.patchValue('#ff0000')
+    this.canvasService.drawPulsePoint(newPulse.x, newPulse.y, newPulse.color)
+
+    this.savePulsePointsLocalStorage()
   }
 }

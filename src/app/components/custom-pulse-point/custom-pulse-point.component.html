@@ -1,0 +1,30 @@
+<div class="custom-force-card mt-10">
+  <div class="d-flex flex-row align-items-center">
+    <div>
+      <p class="mb-5">Point X and Y components -
+        <b>X[{{ pulsePoint.x }}] Y[{{ pulsePoint.y }}]</b>
+        <span class="custom-force-color ml-10" [style.background-color]="pulsePoint.color"></span>
+      </p>
+      <p class="mb-5">Power - <b>{{ pulsePoint.power }}</b></p>
+      <p class="mb-5">Max Radius - <b>{{ pulsePoint.maxRadius }}</b></p>
+      <p class="mb-5">Duration - <b>{{ pulsePoint.duration }}</b></p>
+      <p class="mb-5">Explosion Status - <b>{{ pulsePoint.isCompleted?'':'In Progress' }}</b> </p>
+    </div>
+
+    <div class="ml-auto">
+      <mat-slide-toggle class="ml-10" [formControl]="isActiveControl"></mat-slide-toggle>
+
+      <button class="ml-10" mat-button
+              [disabled]="canvasService.pointInPulsePoints(pulsePoint) || !gravityService.isGravityActive || !pulsePoint.isActive"
+              (click)="canvasService.pulsePointsQueue.push(pulsePoint)">
+        <span class="material-icons"> volcano
+        </span>
+      </button>
+
+      <button class="ml-10" mat-button (click)="settingsService.deletePulsePoint(pulsePoint.id)">
+        <span class="material-icons"> delete
+        </span>
+      </button>
+    </div>
+  </div>
+</div>

@@ -2,11 +2,14 @@ import {ElementRef, Injectable} from '@angular/core';
 import {Particle} from "../classes/Particle";
 import {OverlapInfo} from "../models/overlap.model";
 import {BOARD_CONSTANTS} from "../constants/board.constant";
+import {Pulse} from "../classes/Pulse";
 
 @Injectable({
   providedIn: 'root'
 })
 export class CanvasService {
+
+  public pulsePointsQueue: Pulse[] = [];
 
   private _canvasContext!: CanvasRenderingContext2D;
   private _canvasHTMLRef!: ElementRef<HTMLCanvasElement>;
@@ -32,11 +35,83 @@ export class CanvasService {
     this.canvasContext.save(); // Save current context state
   }
 
+  pointInPulsePoints(pulsePoint:Pulse){
+    return this.pulsePointsQueue.find((el:Pulse) => el.id === pulsePoint.id);
+  }
+
+  drawExplosionCircle(x: number, y: number, radius: number, alpha: number, hexColor: string = "#ff6400") {
+    const rgba = this.hexToRgba(hexColor, alpha);
+
+    this.canvasContext.save();
+    this.canvasContext.beginPath();
+    this.canvasContext.arc(x, y, radius, 0, 2 * Math.PI);
+    this.canvasContext.strokeStyle = rgba;
+    this.canvasContext.lineWidth = 2;
+    this.canvasContext.stroke();
+    this.canvasContext.restore();
+  }
+
+  drawPulsePoint(x: number, y: number, color: string = "#ff0000", radius: number = 3) {
+    this.canvasContext.save();
+    this.canvasContext.beginPath();
+    this.canvasContext.arc(x, y, radius, 0, 2 * Math.PI);
+    this.canvasContext.fillStyle = color;
+    this.canvasContext.fill();
+    this.canvasContext.restore();
+  }
 
   public drawParticlesOnCanvas(
     particles: Particle[],
+    pulsePoints: Pulse[] = []
   ){
     this.clearCanvas();
+
+    // explosion part
+    this.pulsePointsQueue.forEach((pulse) => {
+      if(!pulse.isActive){
+        return
+      }
+
+      pulse.isCompleted = false;
+      pulse.currentTime += Number(1.2);
+
+      const progress = pulse.currentTime / pulse.duration;
+      const radius = pulse.maxRadius * progress;
+
+      // Apply force to particles within radius
+      for (const p of particles) {
+        const dx = p.x - pulse.x;
+        const dy = p.y - pulse.y;
+        const dist = Math.hypot(dx, dy);
+
+        if (dist < radius) {
+          const force = (pulse.power * (1 - dist / radius)) / p.mass;
+          const nx = dx / dist;
+          const ny = dy / dist;
+
+          p.vx += nx * force;
+          p.vy += ny * force;
+        }
+      }
+
+      if(radius > pulse.maxRadius){
+        pulse.isCompleted = true;
+        pulse.currentTime = 0;
+        // pulse.isActive = false;
+
+        this.pulsePointsQueue = this.pulsePointsQueue.filter(p => p.id !== pulse.id);
+      }else{
+        this.drawExplosionCircle(pulse.x, pulse.y, radius, 1 - progress, pulse.color)
+      }
+    })
+
+    pulsePoints.forEach((pulse) => {
+      if(!pulse.isActive){
+        return
+      }
+      this.drawPulsePoint(pulse.x, pulse.y, pulse.color)
+    })
+
     particles.forEach((particle: Particle) => {
       this.canvasContext.beginPath();
       // Set the fill color for the circle.
@@ -104,5 +179,22 @@ export class CanvasService {
     }
 
     return { overlappingWith };
+  }
+
+  hexToRgba(hex: string, alpha: number): string {
+    // Remove # if present
+    hex = hex.replace(/^#/, "");
+
+    // Expand shorthand (e.g. "#f60")
+    if (hex.length === 3) {
+      hex = hex.split("").map(c => c + c).join("");
+    }
+
+    const bigint = parseInt(hex, 16);
+    const r = (bigint >> 16) & 255;
+    const g = (bigint >> 8) & 255;
+    const b = bigint & 255;
+
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   }
 }

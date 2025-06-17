@@ -36,4 +36,7 @@ export class Particle implements IParticle{
     this.category = category;
   }
 
+  public get convertedMass(){
+    return this.massUnit !== 'KG' ? this.mass / 1000: this.mass
+  }
 }

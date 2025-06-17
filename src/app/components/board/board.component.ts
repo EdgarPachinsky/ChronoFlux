@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, ElementRef, HostListener, ViewChild} from '@angular/core';
+import {AfterViewInit, ChangeDetectorRef, Component, ElementRef, HostListener, ViewChild} from '@angular/core';
 import {SettingsService} from "../../services/settings.service";
 import {BOARD_CONSTANTS} from "../../constants/board.constant";
 
@@ -42,6 +42,8 @@ export class BoardComponent implements AfterViewInit {
     )
 
     this.settingsService.loadLocalParticlesAndDraw();
+    this.settingsService.loadLocalCustomForces();
+    this.settingsService.loadLocalPulsePoints();
   }
 
   get loopCountTopBottom(): number {

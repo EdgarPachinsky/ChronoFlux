@@ -7,6 +7,13 @@
       </mat-expansion-panel-header>
 
       <div>
+        <div class="d-flex flex-row align-items-center mt-10 mb-20">
+          <label for="particle-color-control">New Particle color</label>
+          <div class="ml-15">
+            <ngx-colors id="particle-color-control" ngx-colors-trigger
+                        [formControl]="settingsService.particleColorControl"></ngx-colors>
+          </div>
+        </div>
 <!--        <div>-->
 <!--          <p>Quick Actions panel</p>-->
 <!--          <button-->
@@ -63,39 +70,45 @@
 
     <mat-expansion-panel>
       <mat-expansion-panel-header>
-        <b>Force Colors</b>
+        <b>Default Force Colors and Working Status</b>
       </mat-expansion-panel-header>
 
       <div>
-        <div class="d-flex flex-row align-items-center mt-10">
-          <label for="particle-color-control">New Particle color</label>
-          <div class="ml-15">
-            <ngx-colors id="particle-color-control" ngx-colors-trigger
-                        [formControl]="settingsService.particleColorControl"></ngx-colors>
-          </div>
-        </div>
+
+
+<!--        <div class="d-flex flex-row align-items-center mt-10">-->
+<!--          <label for="wind-force-color-control">Wind Force</label>-->
+<!--          <div class="ml-15">-->
+<!--            <ngx-colors id="wind-force-color-control" ngx-colors-trigger-->
+<!--                        [formControl]="settingsService.windForceColorControl"></ngx-colors>-->
+<!--          </div>-->
+
+<!--          <div class="ml-10">-->
+<!--            <mat-slide-toggle [formControl]="settingsService.windForceStatusControl"></mat-slide-toggle>-->
+<!--          </div>-->
+<!--        </div>-->
 
         <div class="d-flex flex-row align-items-center mt-10">
-          <label for="wind-force-color-control">Wind Force Color</label>
-          <div class="ml-15">
-            <ngx-colors id="wind-force-color-control" ngx-colors-trigger
-                        [formControl]="settingsService.windForceColorControl"></ngx-colors>
-          </div>
-        </div>
-
-        <div class="d-flex flex-row align-items-center mt-10">
-          <label for="gravity-force-color-control">Gravity Force Color</label>
+          <label for="gravity-force-color-control">Real Life Gravity Force</label>
           <div class="ml-15">
             <ngx-colors id="gravity-force-color-control" ngx-colors-trigger
                         [formControl]="settingsService.gravityColorControl"></ngx-colors>
           </div>
+
+          <div class="ml-10">
+            <mat-slide-toggle [formControl]="settingsService.gravityStatusControl"></mat-slide-toggle>
+          </div>
         </div>
 
         <div class="d-flex flex-row align-items-center mt-10">
-          <label for="air-resistance-force-color-control">Air Resistance Force Color</label>
+          <label for="air-resistance-force-color-control">Air Resistance Force</label>
           <div class="ml-15">
             <ngx-colors id="air-resistance-force-color-control" ngx-colors-trigger
                         [formControl]="settingsService.airResistanceColorControl"></ngx-colors>
+          </div>
+
+          <div class="ml-10">
+            <mat-slide-toggle [formControl]="settingsService.airResistanceStatusControl"></mat-slide-toggle>
           </div>
         </div>
 
@@ -143,11 +156,173 @@
 
     <mat-expansion-panel>
       <mat-expansion-panel-header>
-        <b>Custom Forces To Apply</b>
+        <b>Custom Forces And Points</b>
       </mat-expansion-panel-header>
 
       <div>
-        Coming Soon !
+
+
+        <mat-accordion>
+          <mat-expansion-panel>
+            <mat-expansion-panel-header>
+              <b>Custom Forces</b>
+            </mat-expansion-panel-header>
+            <div class="mt-20">
+              <div class="mb-10">
+                @for (customForce of settingsService.customForces; track customForce.id){
+                  <app-custom-force [force]="customForce"></app-custom-force>
+                }
+                <hr>
+              </div>
+
+              <div class="d-flex" [formGroup]="settingsService.customForceForm">
+                <mat-form-field class="example-form-field">
+                  <mat-label>Custom Force X</mat-label>
+                  <input matInput type="number" formControlName="x">
+                </mat-form-field>
+
+                <mat-form-field class="example-form-field ml-5">
+                  <mat-label>Custom Force Y</mat-label>
+                  <input matInput type="number" formControlName="y">
+                </mat-form-field>
+
+                <div class="ml-5">
+                  <mat-label>Color</mat-label>
+                  <ngx-colors ngx-colors-trigger formControlName="color"></ngx-colors>
+                </div>
+
+                <mat-form-field class="example-form-field ml-5">
+                  <mat-label>Custom Force Name</mat-label>
+                  <input matInput type="text" formControlName="name">
+                </mat-form-field>
+              </div>
+              <span><i><b>Preview</b></i></span>
+              <div class="d-flex flex-row">
+                <div class="particle-grid-container">
+                  <div class="grid-component x">
+                    <div class="label x">x</div>
+                  </div>
+                  <div class="grid-component y">
+                    <div class="label y">y</div>
+                  </div>
+
+                  <div class="particle">
+                    <div class="force-arrow"
+                         [style.width.px]="35"
+                         [style.background-color]="settingsService.temporaryVector.color"
+                         [style.transform]="'rotate(' + (settingsService.temporaryVector.angle * 180 / Math.PI) + 'deg)'">
+                      <div class="arrowhead-right-part" [style.border-top-color]="'white'"></div>
+                      <div class="arrowhead-left-part" [style.border-top-color]="'white'"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="ml-10">
+                  <p>Force Name - {{ settingsService.customForceNameControl.value }}</p>
+                  <p>Force Angle Based On X and Y (<b>Math.atan2</b>) - {{ settingsService.temporaryVector.angle.toFixed(2) }}° </p>
+                </div>
+              </div>
+              <div class="d-flex justify-content-center">
+                <button
+                  (click)="settingsService.addCustomForce()"
+                  mat-button="elevated">Add Force
+                  <mat-icon>add</mat-icon>
+                </button>
+              </div>
+            </div>
+          </mat-expansion-panel>
+        </mat-accordion>
+
+
+        <div class="mt-10">
+          <mat-accordion>
+            <mat-expansion-panel>
+              <mat-expansion-panel-header>
+                <b>Pulse Point</b>
+              </mat-expansion-panel-header>
+              <div class="mt-20">
+                <div>
+                  <mat-slide-toggle [formControl]="settingsService.isIsInPulsePointAddMode">
+                    @if(!settingsService.isIsInPulsePointAddMode.value){
+                      Turned Off
+                    } @else {
+                      Turned On , Now by clicking on canvas X and Y will be added automatically.
+                    }
+                  </mat-slide-toggle>
+                </div>
+
+                <div class="mt-10">
+
+                  <div class="mb-10">
+                    @for (pulse of settingsService.pulsePoints; track pulse.id){
+                      <app-custom-pulse-point [pulsePoint]="pulse"></app-custom-pulse-point>
+                    }
+                    <hr>
+                  </div>
+
+                  <div [formGroup]="settingsService.customPulseForm">
+                    <div class="d-flex flex-row">
+                      <mat-form-field class="example-form-field">
+                        <mat-label>X</mat-label>
+                        <input matInput type="number" formControlName="x">
+                      </mat-form-field>
+
+                      <mat-form-field class="example-form-field ml-5">
+                        <mat-label>Y</mat-label>
+                        <input matInput type="number" formControlName="y">
+                      </mat-form-field>
+
+                      <mat-form-field class="example-form-field ml-5">
+                        <mat-label>Max Radius</mat-label>
+                        <input matInput type="number" formControlName="maxRadius">
+                      </mat-form-field>
+                    </div>
+
+                    <div class="d-flex flex-row">
+                      <mat-form-field class="example-form-field">
+                        <mat-label>Power</mat-label>
+                        <input matInput type="number" formControlName="power">
+                      </mat-form-field>
+
+
+                      <div class="ml-5">
+                        <mat-label>Color</mat-label>
+                        <ngx-colors ngx-colors-trigger formControlName="color"></ngx-colors>
+                      </div>
+
+                      <mat-form-field class="example-form-field ml-5">
+                        <mat-label>Duration</mat-label>
+                        <input matInput type="number" formControlName="duration">
+                      </mat-form-field>
+                    </div>
+                  </div>
+                </div>
+                <div class="d-flex justify-content-center">
+                  <button
+                    [disabled]="!settingsService.isIsInPulsePointAddMode.value"
+                    (click)="settingsService.addCustomPulsePoint()"
+                    mat-button="elevated">Add Pulse Point
+                    <mat-icon>add</mat-icon>
+                  </button>
+                </div>
+              </div>
+            </mat-expansion-panel>
+          </mat-accordion>
+        </div>
+
+        <div class="mt-10">
+          <mat-accordion>
+            <mat-expansion-panel>
+              <mat-expansion-panel-header>
+                <b>Gravitation Point</b>
+              </mat-expansion-panel-header>
+              <div class="mt-20">
+
+              </div>
+            </mat-expansion-panel>
+          </mat-accordion>
+        </div>
+
       </div>
     </mat-expansion-panel>
   </mat-accordion>
@@ -162,23 +337,23 @@
   </div>
 </div>
 
-<p class="mt-20"><b>Forces</b></p>
+<p class="mt-20"><b>Simulation Status</b></p>
 <div class="d-flex flex-column ">
   <div class="d-flex flex-row">
     <button
-      (click)="gravityService.activateGravity(settingsService.particles)"
+      (click)="gravityService.activateGravity(settingsService.particles, settingsService.pulsePoints)"
       mat-button="tonal"
     >
       <span class="mr-5 button-action-indicator"
             [ngClass]="{'not-active': !gravityService.isGravityActive, 'active': gravityService.isGravityActive}">
       </span>
-      Turn On Forces
+      Turn On
     </button>
 
 
     <button
       (click)="gravityService.pauseGravityAnimation()"
-      mat-button="filled" class="ml-10">Pause Animation
+      mat-button="filled" class="ml-10">Pause
       <mat-icon>pause</mat-icon>
     </button>
   </div>
@@ -204,8 +379,7 @@
             <div class="mt-5 d-flex flex-row align-items-center">
               <div class="force-color-label-mini mr-5" [style.background-color]="force.color"></div>
               <div>
-                <span class="force-label"
-                      (click)="settingsService.setVisibilityForForce(particle, force)">
+                <span class="force-label">
                   {{ force.forceName }}</span> - {{ force.magnitude.toFixed(1) }}
                 / {{ ((force.angle * 180 / Math.PI)).toFixed(2) }}°
               </div>

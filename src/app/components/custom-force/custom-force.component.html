@@ -1,0 +1,18 @@
+<div class="custom-force-card mt-10">
+  <div class="d-flex flex-row align-items-center">
+    <div>
+      <p class="mb-0">Force Name - <b>{{ force.forceName }}</b> <span class="custom-force-color ml-10" [style.background-color]="force.color"></span></p>
+      <p class="mb-0">Force X and Y components - <b>X[{{ force.x }}] Y[{{ force.y }}]</b></p>
+      <p> Force Angle - <b>{{ force.angle.toFixed(2) }}°</b> </p>
+    </div>
+
+    <div class="ml-auto">
+      <mat-slide-toggle [formControl]="isActiveControl"></mat-slide-toggle>
+
+      <button class="ml-10" mat-button (click)="settingsService.deleteCustomForce(force.id)">
+        <span class="material-icons"> delete
+        </span>
+      </button>
+    </div>
+  </div>
+</div>
