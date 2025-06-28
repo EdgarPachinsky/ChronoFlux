@@ -1,19 +1,23 @@
-<div class="d-flex flex-column ">
-  <mat-accordion multi>
-
+<div class="d-flex flex-column app-settings-container"
+     [style.width.px]="settingsContainerConfig.width"
+     [style.height.px]="settingsContainerConfig.height"
+>
+  <mat-accordion class="mb-5" multi>
     <mat-expansion-panel>
       <mat-expansion-panel-header>
         <b>Static Settings For Particles</b>
       </mat-expansion-panel-header>
-
       <div>
         <div class="d-flex flex-row align-items-center mt-10 mb-20">
-          <label for="particle-color-control">New Particle color</label>
+          <label for="particle-color-control">
+            New Particle color
+          </label>
           <div class="ml-15">
             <ngx-colors id="particle-color-control" ngx-colors-trigger
                         [formControl]="settingsService.particleColorControl"></ngx-colors>
           </div>
         </div>
+
 <!--        <div>-->
 <!--          <p>Quick Actions panel</p>-->
 <!--          <button-->
@@ -38,36 +42,109 @@
           <label for="particle-radius-control">New Particle Radius ({{ settingsService.particleRadiusControl.value }}
             px)</label>
           <div class="ml-auto">
-            <mat-slider id="particle-radius-control" min="10" max="50" step="1" [displayWith]="showLabel">
+            <mat-slider id="particle-radius-control" min="10" max="100" step="1" [displayWith]="showLabel">
               <input matSliderThumb [formControl]="settingsService.particleRadiusControl">
             </mat-slider>
           </div>
         </div>
 
-        <div class="d-flex flex-row align-items-center ml-auto">
+        <div class="d-flex flex-row align-items-center">
           <label class="particle-mass-control-label" for="particle-mass-control">New Particle Mass
             ({{ settingsService.particleMassControl.value }})</label>
-          <div class="ml-15">
-            <mat-slider id="particle-mass-control" min="10" max="9000" step="10" [displayWith]="showLabel">
+          <div class="ml-auto">
+            <mat-slider id="particle-mass-control" min="10" max="10000" step="10" [displayWith]="showLabel">
               <input matSliderThumb [formControl]="settingsService.particleMassControl">
             </mat-slider>
           </div>
+        </div>
 
+        <div class="ml-auto">
+          <mat-form-field>
+            <mat-label>Units</mat-label>
+            <mat-select [formControl]="settingsService.particleMassUnitControl">
+              @for (unit of settingsService.particleMassUnits; track unit) {
+                <mat-option [value]="unit">{{ unit }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <hr>
+        <h6 class="mt-20">Space Bodies</h6>
+        <div class="d-flex flex-row align-items-center mt-10 mb-20">
+          <label for="is-black-hole-mode">
+            Is Black Hole
+            <span
+              [matTooltip]="'Black hole mode only available when space mode is active.'"
+              class="question-mark-container material-icons">
+              question_mark
+            </span>
+          </label>
           <div class="ml-15">
-            <mat-form-field>
-              <mat-label>Units</mat-label>
-              <mat-select [formControl]="settingsService.particleMassUnitControl">
-                @for (unit of settingsService.particleMassUnits; track unit) {
-                  <mat-option [value]="unit">{{ unit }}</mat-option>
-                }
-              </mat-select>
-            </mat-form-field>
+            <mat-slide-toggle id="is-black-hole-mode" [formControl]="settingsService.particleIsBlackHoleControl"></mat-slide-toggle>
           </div>
         </div>
 
+        <div class="d-flex flex-row align-items-center mt-10 mb-20">
+          <label for="is-star-mode">
+            Is Star
+            <span
+              [matTooltip]="'Star mode only available when space mode is active.'"
+              class="question-mark-container material-icons">
+              question_mark
+            </span>
+          </label>
+          <div class="ml-15">
+            <mat-slide-toggle id="is-star-mode" [formControl]="settingsService.particleIsStarControl"></mat-slide-toggle>
+          </div>
+        </div>
+
+        <div class="d-flex flex-row align-items-center w-100 mt-10 mb-20">
+          <div class="d-flex flex-row">
+            <label for="is-planet-mode">
+              Is Planet
+              <span
+                [matTooltip]="'Is Planet mode only available when space mode is active.'"
+                class="question-mark-container material-icons">
+              question_mark
+            </span>
+            </label>
+            <div class="ml-15">
+              <mat-slide-toggle id="is-planet-mode" [formControl]="settingsService.particleIsPlanetControl"></mat-slide-toggle>
+            </div>
+          </div>
+          @if(settingsService.particleIsPlanetControl.value){
+            <div class="ml-15">
+              <div class="d-flex flex-row align-items-center">
+                <label for="is-gas-type">
+                  Is Gas Type
+                </label>
+                <div class="ml-15">
+                  <mat-slide-toggle id="is-gas-type" [formControl]="settingsService.particleIsPlanetGasSubtypeControl"></mat-slide-toggle>
+                </div>
+              </div>
+            </div>
+          }
+
+          @if(settingsService.particleIsPlanetControl.value){
+            <div class="ml-15">
+              <div class="d-flex flex-row align-items-center">
+                <label for="has-circles">
+                  Planetary Rings
+                </label>
+                <div class="ml-15">
+                  <mat-slide-toggle id="has-circles" [formControl]="settingsService.particleIsPlanetHasCirclesControl"></mat-slide-toggle>
+                </div>
+              </div>
+            </div>
+          }
+
+        </div>
       </div>
     </mat-expansion-panel>
+  </mat-accordion>
 
+  <mat-accordion class="mb-5"  multi>
     <mat-expansion-panel>
       <mat-expansion-panel-header>
         <b>Default Force Colors and Working Status</b>
@@ -122,7 +199,9 @@
       </div>
 
     </mat-expansion-panel>
+  </mat-accordion>
 
+  <mat-accordion class="mb-5"  multi>
     <mat-expansion-panel>
       <mat-expansion-panel-header>
         <b>Dynamic Settings (Can be changed during animations)</b>
@@ -153,180 +232,229 @@
         </div>
       </div>
     </mat-expansion-panel>
+  </mat-accordion>
 
+  <mat-accordion class="mb-5"  multi>
     <mat-expansion-panel>
       <mat-expansion-panel-header>
-        <b>Custom Forces And Points</b>
+        <b>Stationary Forces</b>
       </mat-expansion-panel-header>
 
       <div>
+        <div>
+          <p>These are fixed or manually placed forces or points that affect particles when activated.</p>
+          <div class="mt-10">
+            <mat-accordion>
+              <mat-expansion-panel>
+                <mat-expansion-panel-header>
+                  <b>Custom Forces</b>
+                </mat-expansion-panel-header>
+                <div class="mt-20">
 
+                  <div class="d-flex" [formGroup]="settingsService.customForceForm">
+                    <mat-form-field class="example-form-field">
+                      <mat-label>X Component</mat-label>
+                      <input matInput type="number" formControlName="x">
+                    </mat-form-field>
 
-        <mat-accordion>
-          <mat-expansion-panel>
-            <mat-expansion-panel-header>
-              <b>Custom Forces</b>
-            </mat-expansion-panel-header>
-            <div class="mt-20">
-              <div class="mb-10">
-                @for (customForce of settingsService.customForces; track customForce.id){
-                  <app-custom-force [force]="customForce"></app-custom-force>
-                }
-                <hr>
-              </div>
+                    <mat-form-field class="example-form-field ml-5">
+                      <mat-label>Y Component</mat-label>
+                      <input matInput type="number" formControlName="y">
+                    </mat-form-field>
 
-              <div class="d-flex" [formGroup]="settingsService.customForceForm">
-                <mat-form-field class="example-form-field">
-                  <mat-label>Custom Force X</mat-label>
-                  <input matInput type="number" formControlName="x">
-                </mat-form-field>
+                    <mat-form-field class="example-form-field ml-5">
+                      <mat-label>Name</mat-label>
+                      <input matInput type="text" formControlName="name">
+                    </mat-form-field>
 
-                <mat-form-field class="example-form-field ml-5">
-                  <mat-label>Custom Force Y</mat-label>
-                  <input matInput type="number" formControlName="y">
-                </mat-form-field>
+                    <div class="ml-5">
+                      <mat-label>Color</mat-label>
+                      <ngx-colors ngx-colors-trigger formControlName="color"></ngx-colors>
+                    </div>
 
-                <div class="ml-5">
-                  <mat-label>Color</mat-label>
-                  <ngx-colors ngx-colors-trigger formControlName="color"></ngx-colors>
-                </div>
-
-                <mat-form-field class="example-form-field ml-5">
-                  <mat-label>Custom Force Name</mat-label>
-                  <input matInput type="text" formControlName="name">
-                </mat-form-field>
-              </div>
-              <span><i><b>Preview</b></i></span>
-              <div class="d-flex flex-row">
-                <div class="particle-grid-container">
-                  <div class="grid-component x">
-                    <div class="label x">x</div>
                   </div>
-                  <div class="grid-component y">
-                    <div class="label y">y</div>
-                  </div>
+                  <span><i><b>Preview</b></i></span>
+                  <div class="d-flex flex-row">
+                    <div class="particle-grid-container">
+                      <div class="grid-component x">
+                        <div class="label x">x</div>
+                      </div>
+                      <div class="grid-component y">
+                        <div class="label y">y</div>
+                      </div>
 
-                  <div class="particle">
-                    <div class="force-arrow"
-                         [style.width.px]="35"
-                         [style.background-color]="settingsService.temporaryVector.color"
-                         [style.transform]="'rotate(' + (settingsService.temporaryVector.angle * 180 / Math.PI) + 'deg)'">
-                      <div class="arrowhead-right-part" [style.border-top-color]="'white'"></div>
-                      <div class="arrowhead-left-part" [style.border-top-color]="'white'"></div>
+                      <div class="particle">
+                        <div class="force-arrow"
+                             [style.width.px]="35"
+                             [style.background-color]="settingsService.temporaryVector.color"
+                             [style.transform]="'rotate(' + (settingsService.temporaryVector.angle * 180 / Math.PI) + 'deg)'">
+                          <div class="arrowhead-right-part" [style.border-top-color]="'white'"></div>
+                          <div class="arrowhead-left-part" [style.border-top-color]="'white'"></div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="ml-10">
+                      <p>Force Name - {{ settingsService.customForceNameControl.value }}</p>
+                      <p>Force Angle Based On X and Y (<b>Math.atan2</b>) - {{ settingsService.temporaryVector.angle.toFixed(2) }}° </p>
                     </div>
                   </div>
-                </div>
-
-                <div class="ml-10">
-                  <p>Force Name - {{ settingsService.customForceNameControl.value }}</p>
-                  <p>Force Angle Based On X and Y (<b>Math.atan2</b>) - {{ settingsService.temporaryVector.angle.toFixed(2) }}° </p>
-                </div>
-              </div>
-              <div class="d-flex justify-content-center">
-                <button
-                  (click)="settingsService.addCustomForce()"
-                  mat-button="elevated">Add Force
-                  <mat-icon>add</mat-icon>
-                </button>
-              </div>
-            </div>
-          </mat-expansion-panel>
-        </mat-accordion>
-
-
-        <div class="mt-10">
-          <mat-accordion>
-            <mat-expansion-panel>
-              <mat-expansion-panel-header>
-                <b>Pulse Point</b>
-              </mat-expansion-panel-header>
-              <div class="mt-20">
-                <div>
-                  <mat-slide-toggle [formControl]="settingsService.isIsInPulsePointAddMode">
-                    @if(!settingsService.isIsInPulsePointAddMode.value){
-                      Turned Off
-                    } @else {
-                      Turned On , Now by clicking on canvas X and Y will be added automatically.
-                    }
-                  </mat-slide-toggle>
-                </div>
-
-                <div class="mt-10">
+                  <div class="d-flex justify-content-center">
+                    <button
+                      (click)="settingsService.addCustomForce()"
+                      mat-button="elevated">Add Force
+                      <mat-icon>add</mat-icon>
+                    </button>
+                  </div>
+                  <hr>
 
                   <div class="mb-10">
-                    @for (pulse of settingsService.pulsePoints; track pulse.id){
-                      <app-custom-pulse-point [pulsePoint]="pulse"></app-custom-pulse-point>
+                    @for (customForce of settingsService.customForces; track customForce.id){
+                      <app-custom-force [force]="customForce"></app-custom-force>
                     }
                     <hr>
                   </div>
 
-                  <div [formGroup]="settingsService.customPulseForm">
-                    <div class="d-flex flex-row">
-                      <mat-form-field class="example-form-field">
-                        <mat-label>X</mat-label>
-                        <input matInput type="number" formControlName="x">
-                      </mat-form-field>
+                </div>
+              </mat-expansion-panel>
+            </mat-accordion>
+          </div>
+          <div class="mt-10">
+            <mat-accordion>
+              <mat-expansion-panel>
+                <mat-expansion-panel-header>
+                  <b>Pulse Point</b>
+                </mat-expansion-panel-header>
+                <div class="mt-20">
+                  <div>
+                    <mat-slide-toggle [formControl]="settingsService.isIsInPulsePointAddMode">
+                      @if(!settingsService.isIsInPulsePointAddMode.value){
+                        Turned Off
+                      } @else {
+                        Turned On , Now by clicking on canvas X and Y will be added automatically.
+                      }
+                    </mat-slide-toggle>
+                  </div>
 
-                      <mat-form-field class="example-form-field ml-5">
-                        <mat-label>Y</mat-label>
-                        <input matInput type="number" formControlName="y">
-                      </mat-form-field>
+                  <div class="mt-10">
+                    <div class="mb-10">
+                      <div [formGroup]="settingsService.customPulseForm">
+                        <div class="d-flex flex-row">
+                          <mat-form-field class="example-form-field">
+                            <mat-label>X</mat-label>
+                            <input matInput type="number" formControlName="x">
+                          </mat-form-field>
 
-                      <mat-form-field class="example-form-field ml-5">
-                        <mat-label>Max Radius</mat-label>
-                        <input matInput type="number" formControlName="maxRadius">
-                      </mat-form-field>
-                    </div>
+                          <mat-form-field class="example-form-field ml-5">
+                            <mat-label>Y</mat-label>
+                            <input matInput type="number" formControlName="y">
+                          </mat-form-field>
 
-                    <div class="d-flex flex-row">
-                      <mat-form-field class="example-form-field">
-                        <mat-label>Power</mat-label>
-                        <input matInput type="number" formControlName="power">
-                      </mat-form-field>
+                          <mat-form-field class="example-form-field ml-5">
+                            <mat-label>Max Radius</mat-label>
+                            <input matInput type="number" formControlName="maxRadius">
+                          </mat-form-field>
+                        </div>
 
-
-                      <div class="ml-5">
-                        <mat-label>Color</mat-label>
-                        <ngx-colors ngx-colors-trigger formControlName="color"></ngx-colors>
+                        <div class="d-flex flex-row">
+                          <mat-form-field class="example-form-field">
+                            <mat-label>Power</mat-label>
+                            <input matInput type="number" formControlName="power">
+                          </mat-form-field>
+                          <mat-form-field class="example-form-field ml-5">
+                            <mat-label>Duration</mat-label>
+                            <input matInput type="number" formControlName="duration">
+                          </mat-form-field>
+                          <mat-form-field class="example-form-field ml-5">
+                            <mat-label>Interval (ms 1000ms = 1s)</mat-label>
+                            <input matInput type="number" formControlName="interval">
+                          </mat-form-field>
+                        </div>
+                        <div>
+                          <div class="ml-10">
+                            <mat-label>Color</mat-label>
+                            <ngx-colors ngx-colors-trigger formControlName="color"></ngx-colors>
+                          </div>
+                        </div>
+                        <p class="ml-5 mt-10">
+                          Only intervals bigger then <b>500</b>ms will be considered.
+                        </p>
                       </div>
+                      <div class="d-flex justify-content-center mt-10">
+                        <button
+                          [disabled]="!settingsService.isIsInPulsePointAddMode.value"
+                          (click)="settingsService.addCustomPulsePoint()"
+                          mat-button="elevated">Add Pulse Point
+                          <mat-icon>add</mat-icon>
+                        </button>
+                      </div>
+                      <hr>
+                      @for (pulse of settingsService.pulsePoints; track pulse.id){
+                        <app-custom-pulse-point [pulsePoint]="pulse"></app-custom-pulse-point>
+                      }
 
-                      <mat-form-field class="example-form-field ml-5">
-                        <mat-label>Duration</mat-label>
-                        <input matInput type="number" formControlName="duration">
-                      </mat-form-field>
                     </div>
                   </div>
                 </div>
-                <div class="d-flex justify-content-center">
-                  <button
-                    [disabled]="!settingsService.isIsInPulsePointAddMode.value"
-                    (click)="settingsService.addCustomPulsePoint()"
-                    mat-button="elevated">Add Pulse Point
-                    <mat-icon>add</mat-icon>
-                  </button>
-                </div>
-              </div>
-            </mat-expansion-panel>
-          </mat-accordion>
+              </mat-expansion-panel>
+            </mat-accordion>
+          </div>
         </div>
-
-        <div class="mt-10">
-          <mat-accordion>
-            <mat-expansion-panel>
-              <mat-expansion-panel-header>
-                <b>Gravitation Point</b>
-              </mat-expansion-panel-header>
-              <div class="mt-20">
-
-              </div>
-            </mat-expansion-panel>
-          </mat-accordion>
-        </div>
-
       </div>
     </mat-expansion-panel>
   </mat-accordion>
 
+
+  <mat-accordion class="mb-5"  multi>
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <div class="d-flex flex-row align-items-center w-100">
+          <div><b>Space Simulations</b></div>
+          <div (click)="$event.stopImmediatePropagation()" class="d-flex flex-row align-items-center ml-auto mr-10">
+                  <span
+                    [matTooltip]="'When space simulation is turned on , then gravity and air resistance will be turned off by default, custom forces and pulse points will be available.'"
+                    class="question-mark-container material-icons">
+                    question_mark
+                  </span>
+            <mat-slide-toggle [formControl]="settingsService.isSpaceSimulationModeControl"></mat-slide-toggle>
+          </div>
+        </div>
+      </mat-expansion-panel-header>
+
+      <div>
+        <p>These simulate astrophysical behavior with dynamic interactions.</p>
+        <div class="mt-10">
+          <mat-accordion>
+            <mat-expansion-panel>
+              <mat-expansion-panel-header>
+                <b>Centripetal Force (Planetary Force)</b>
+              </mat-expansion-panel-header>
+              <div class="mt-20">
+                <div>
+                  @for (planet of settingsService.planets; track planet.id){
+                    <app-custom-planet-point [planetPoint]="planet"></app-custom-planet-point>
+                  }
+                </div>
+
+                <hr>
+                <div class="mt-10">
+                  <mat-form-field class="w-100">
+                    <mat-label>Select Particles To Be As Planet</mat-label>
+                    <mat-select [formControl]="settingsService.planetsControl" multiple>
+                      @for (particle of settingsService.particles; track particle.id) {
+                        <mat-option [value]="particle.id"><b>ID</b>[{{particle.id}}] <b>MASS</b>[{{particle.convertedMass}} KG]</mat-option>
+                      }
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+              </div>
+            </mat-expansion-panel>
+          </mat-accordion>
+        </div>
+      </div>
+
+    </mat-expansion-panel>
+  </mat-accordion>
 
   <div class="mt-15">
     <button
@@ -335,85 +463,148 @@
       <mat-icon>close</mat-icon>
     </button>
   </div>
-</div>
 
-<p class="mt-20"><b>Simulation Status</b></p>
-<div class="d-flex flex-column ">
-  <div class="d-flex flex-row">
-    <button
-      (click)="gravityService.activateGravity(settingsService.particles, settingsService.pulsePoints)"
-      mat-button="tonal"
-    >
+
+  <p class="mt-20"><b>Simulation Status</b></p>
+  <div class="d-flex flex-column ">
+    <div class="d-flex flex-row">
+      <button
+        (click)="gravityService.activateGravity(settingsService.particles, settingsService.pulsePoints)"
+        mat-button="tonal"
+      >
       <span class="mr-5 button-action-indicator"
             [ngClass]="{'not-active': !gravityService.isGravityActive, 'active': gravityService.isGravityActive}">
       </span>
-      Turn On
-    </button>
+        Turn On
+      </button>
 
 
-    <button
-      (click)="gravityService.pauseGravityAnimation()"
-      mat-button="filled" class="ml-10">Pause
-      <mat-icon>pause</mat-icon>
-    </button>
+      <button
+        (click)="gravityService.pauseGravityAnimation()"
+        mat-button="filled" class="ml-10">Pause
+        <mat-icon>pause</mat-icon>
+      </button>
+    </div>
   </div>
-</div>
 
-<p class="mt-20"><b>Particles</b></p>
-<div class="d-flex flex-column">
-  @for (particle of settingsService.particles; track particle.id) {
-    <div class="particle-card d-flex flex-row align-items-center mb-5 board p-10">
+  <p class="mt-20"><b>Particles</b></p>
+  <div class="d-flex flex-column">
+    @for (particle of settingsService.particles; track particle.id) {
+      <div class="particle-card d-flex flex-row align-items-center mb-5 board p-10">
 
-      <div>
-        <div class="particle-card-body d-flex flex-column">
-          <div class="mt-5">Particle Id - {{ particle.id }}</div>
-          <div class="mt-5">X[{{ particle.x.toFixed(1) }}] Y[{{ particle.y.toFixed(1) }}]</div>
-          <div class="mt-5">Mass {{ particle.mass }} {{ particle.massUnit }}</div>
-          <div class="mt-5">Speed (m/s) {{ particle.speed.toFixed(1) }}</div>
+        <div class=" particle-grid-container">
+          <div class="grid-component x">
+            <div class="label x">x</div>
+          </div>
+          <div class="grid-component y">
+            <div class="label y">y</div>
+          </div>
+
+          <div class="particle">
+            <div class="particle-id"><b>{{ particle.id }}</b></div>
+
+            @for (force of particle.forceVectors; track force.forceName) {
+              @if (force.showArrowInMiniParticle) {
+                <div class="force-arrow"
+                     [style.width.px]="35"
+                     [style.background-color]="force.color"
+                     [style.transform]="'rotate(' + (force.angle * 180 / Math.PI) + 'deg)'">
+                  <div class="arrowhead-right-part" [style.border-top-color]="'white'"></div>
+                  <div class="arrowhead-left-part" [style.border-top-color]="'white'"></div>
+                </div>
+              }
+            }
+          </div>
         </div>
-      </div>
 
-      <div class="ml-50">
-        <div class="particle-card-body d-flex flex-column ">
-          @for (force of particle.forceVectors; track force.forceName) {
-            <div class="mt-5 d-flex flex-row align-items-center">
-              <div class="force-color-label-mini mr-5" [style.background-color]="force.color"></div>
-              <div>
+        <div class="ml-10">
+          <div class="particle-card-body d-flex flex-column">
+            <div class="mt-5">Type - {{ particle.typeLabel }}
+              <span class="d-inline">@if(particle.type === 'planet' && particle.planetSubType){/ {{particle.typePlanetSubTypeLabel}} }</span>
+            </div>
+            <div class="mt-5">X[{{ particle.x.toFixed(1) }}] Y[{{ particle.y.toFixed(1) }}]</div>
+            <div class="mt-5">
+              @if(!settingsService.showMassChangeInputForParticle[particle.id]){
+              <div class="cursor-pointer"
+                   (click)="settingsService.toggleShowMassChangeInputForParticle(particle)">Mass {{ particle.mass }} {{ particle.massUnit }}</div>
+              } @else{
+                <div class="d-flex flex-row">
+                  <div class="d-flex flex-row">
+                    <input [(ngModel)]="settingsService.showMassChangeInputForParticle[particle.id].newValue" class="not-material-input small" type="text">
+                    <span [matMenuTriggerFor]="massUnitMenu" class="little-input-additional-label">
+                      @if(settingsService.showMassChangeInputForParticle[particle.id]){{{settingsService.showMassChangeInputForParticle[particle.id].massUnit}}}
+                      @else{ {{particle.mass}} }
+                    </span>
+
+                    <mat-menu #massUnitMenu="matMenu">
+                      <button (click)="settingsService.changeMassUnit(particle, 'kg')" mat-menu-item>
+                        <span>KG</span>
+                      </button>
+                      <button (click)="settingsService.changeMassUnit(particle, 'g')" mat-menu-item>
+                        <span>G</span>
+                      </button>
+                    </mat-menu>
+                  </div>
+                  <div (click)="settingsService.applyMassChangeInputForParticle(particle)" class="d-inline ml-10 cursor-pointer text-color-warning">
+                    <span class="material-icons">
+                      check
+                    </span>
+                  </div>
+                  <div (click)="settingsService.hideMassChangeInputForParticle(particle)" class="d-inline ml-10 cursor-pointer text-color-warning">
+                    <span class="material-icons">
+                      cancel
+                    </span>
+                  </div>
+                </div>
+              }
+            </div>
+
+            <div class="mt-5">
+              @if(!settingsService.showRadiusChangeInputForParticle[particle.id]){
+                <div class="cursor-pointer"
+                     (click)="settingsService.toggleShowRadiusChangeInputForParticle(particle)">Radius {{ particle.radius }}</div>
+              } @else{
+                <div class="d-flex flex-row">
+                  <div class="d-flex flex-row">
+                    <input
+                      [(ngModel)]="settingsService.showRadiusChangeInputForParticle[particle.id].newValue" class="not-material-input small" type="text">
+                  </div>
+
+                  <div (click)="settingsService.applyRadiusChangeInputForParticle(particle)" class="d-inline ml-10 cursor-pointer text-color-warning">
+                    <span class="material-icons">
+                      check
+                    </span>
+                  </div>
+                  <div (click)="settingsService.hideRadiusChangeInputForParticle(particle)" class="d-inline ml-10 cursor-pointer text-color-warning">
+                    <span class="material-icons">
+                      cancel
+                    </span>
+                  </div>
+                </div>
+              }
+
+            </div>
+            <div class="mt-5">Speed (m/s) {{ particle.speed.toFixed(1) }}</div>
+          </div>
+        </div>
+
+        <div class="ml-50">
+          <div class="particle-card-body d-flex flex-column ">
+            @for (force of particle.forceVectors; track force.forceName) {
+              <div class="mt-5 d-flex flex-row align-items-center">
+                <div class="force-color-label-mini mr-5" [style.background-color]="force.color"></div>
+                <div>
                 <span class="force-label">
                   {{ force.forceName }}</span> - {{ force.magnitude.toFixed(1) }}
-                / {{ ((force.angle * 180 / Math.PI)).toFixed(2) }}°
-              </div>
-            </div>
-          }
-
-        </div>
-      </div>
-
-      <div class="ml-auto particle-grid-container">
-        <div class="grid-component x">
-          <div class="label x">x</div>
-        </div>
-        <div class="grid-component y">
-          <div class="label y">y</div>
-        </div>
-
-        <div class="particle">
-          <div class="particle-id"><b>{{ particle.id }}</b></div>
-
-          @for (force of particle.forceVectors; track force.forceName) {
-            @if (force.showArrowInMiniParticle) {
-              <div class="force-arrow"
-                   [style.width.px]="35"
-                   [style.background-color]="force.color"
-                   [style.transform]="'rotate(' + (force.angle * 180 / Math.PI) + 'deg)'">
-                <div class="arrowhead-right-part" [style.border-top-color]="'white'"></div>
-                <div class="arrowhead-left-part" [style.border-top-color]="'white'"></div>
+                  / {{ ((force.angle * 180 / Math.PI)).toFixed(2) }}°
+                </div>
               </div>
             }
-          }
-        </div>
-      </div>
-    </div>
-  }
-</div>
 
+          </div>
+        </div>
+
+      </div>
+    }
+  </div>
+</div>

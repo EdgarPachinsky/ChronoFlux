@@ -1,36 +1,57 @@
-<div class="board-container">
-  <div>
-    <canvas
-      [attr.width]="BOARD_CONSTANTS.width"
-      [attr.height]="BOARD_CONSTANTS.height"
-      (mousemove)="settingsService.handleCanvasMouseMove($event)"
-      (mousedown)="settingsService.handleCanvasMouseDown($event)"
-      (mouseup)="settingsService.handleCanvasMouseUp($event)"
-      (click)="settingsService.handleCanvasClick($event)"
-      #mainCanvas></canvas>
-  </div>
-  <div class="border bottom">
-    @for (loopItem of generateRange(loopCountTopBottom); track loopItem){
-      <div class="density-element bottom" [style.left.px]="loopItem * 10"></div>
+<div>
+  <div class="board-container">
+    <div>
+      <canvas
+        [attr.width]="BOARD_CONSTANTS.width"
+        [attr.height]="BOARD_CONSTANTS.height"
+        (mousemove)="settingsService.handleCanvasMouseMove($event)"
+        (mousedown)="settingsService.handleCanvasMouseDown($event)"
+        (mouseup)="settingsService.handleCanvasMouseUp($event)"
+        (click)="settingsService.handleCanvasClick($event)"
+        #mainCanvas></canvas>
+    </div>
+
+
+    @if(!settingsService.isSpaceSimulationModeControl.value){
+      <div class="border bottom">
+        @for (loopItem of generateRange(loopCountTopBottom); track loopItem){
+          <div class="density-element bottom" [style.left.px]="loopItem * 10"></div>
+        }
+      </div>
+
+      <div class="border top">
+        @for (loopItem of generateRange(loopCountTopBottom); track loopItem){
+          <div class="density-element top" [style.left.px]="loopItem * 10"></div>
+        }
+      </div>
+
+      <div class="border left">
+        @for (loopItem of generateRange(loopCountLeftRight); track loopItem){
+          <div class="density-element left" [style.top.px]="loopItem * 10"></div>
+        }
+      </div>
+
+      <div class="border right">
+        @for (loopItem of generateRange(loopCountLeftRight); track loopItem){
+          <div class="density-element right" [style.top.px]="loopItem * 10"></div>
+        }
+      </div>
     }
   </div>
 
-  <div class="border top">
-    @for (loopItem of generateRange(loopCountTopBottom); track loopItem){
-      <div class="density-element top" [style.left.px]="loopItem * 10"></div>
-    }
-  </div>
-
-
-  <div class="border left">
-    @for (loopItem of generateRange(loopCountLeftRight); track loopItem){
-      <div class="density-element left" [style.top.px]="loopItem * 10"></div>
-    }
-  </div>
-
-  <div class="border right">
-    @for (loopItem of generateRange(loopCountLeftRight); track loopItem){
-      <div class="density-element right" [style.top.px]="loopItem * 10"></div>
-    }
-  </div>
+  @if(settingsService.pulsePoints && settingsService.pulsePoints.length){
+    <div class="mt-20">
+      <p class="mb-10">Quick Pulse Explosions</p>
+      <div class="d-flex flex-row mt-10">
+        @for (pulse of settingsService.pulsePoints; track pulse.id){
+          <button class="mr-10" mat-button
+                      [disabled]="canvasService.pointInPulsePoints(pulse) || !gravityService.isGravityActive || !pulse.isActive"
+                      (click)="canvasService.pulsePointsQueue.push(pulse)">
+            <span class="custom-force-color ml-10" [style.background-color]="pulse.color"></span>
+            <span class="material-icons mr-5">volcano</span>
+          </button>
+        }
+      </div>
+    </div>
+  }
 </div>

@@ -1,4 +1,4 @@
 export const BOARD_CONSTANTS = {
-  width: 500,
-  height: 600,
+  width: 0, // dynamically set in board component
+  height: 0, // dynamically set in board component
 }

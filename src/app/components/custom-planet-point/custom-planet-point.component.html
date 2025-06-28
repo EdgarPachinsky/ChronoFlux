@@ -1,0 +1,22 @@
+<div class="custom-force-card mt-10">
+  <div class="d-flex flex-row align-items-center">
+
+    <div>
+      <p class="mb-5">
+        Planet <b>[{{planetPoint.id}}]</b>, MASS - <b>{{planetPoint.convertedMass}} KG</b>
+      </p>
+    </div>
+
+    <div class="ml-auto d-flex flex-row">
+      <mat-form-field class="example-form-field">
+        <mat-label>Gravitational Constant ~ G</mat-label>
+        <input matInput type="number" [formControl]="gravitationalConstantControl">
+      </mat-form-field>
+
+      <button class="ml-10" mat-button (click)="settingsService.deleteCustomPlanetPoint(planetPoint.id)">
+        <span class="material-icons"> delete
+        </span>
+      </button>
+    </div>
+  </div>
+</div>

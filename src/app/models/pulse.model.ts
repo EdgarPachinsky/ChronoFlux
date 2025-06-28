@@ -9,6 +9,7 @@ export interface IPulse {
   color: string
   duration: number // ms
   currentTime: number; // how long it’s been running
+  pulseInterval: number;
   // applyOn: Particle[] | '*'
 }
 

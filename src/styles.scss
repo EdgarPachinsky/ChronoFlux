@@ -252,3 +252,60 @@ body {
     background: #ba005c;
   }
 }
+
+.custom-force-card{
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  border-radius: 10px;
+  border: 2px solid #222222;
+}
+.custom-force-color{
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+.question-mark-container{
+  display: inline-block;
+  margin: 0 10px;
+  border-radius: 50%;
+  width: 27px;
+  height: 25px;
+  font-size: 20px;
+  background: #c00100;
+  cursor: pointer;
+  text-align: center;
+  padding-top: 2px;
+  color: white;
+}
+.d-inline{
+  display: inline-block;
+}
+.not-material-input{
+  background: #324b4b;
+  border: 1px solid black;
+  color: white;
+  padding: 2px 10px;
+  border-radius: 3px;
+
+  &.small{
+    max-width: 100px;
+  }
+}
+.little-input-additional-label{
+  background: #efa9a1;
+  color: white;
+  text-align: center;
+  padding: 0px 5px;
+  display: inline-block;
+  position: relative;
+  left: -3px;
+  border-radius: 3px;
+  height: 28px;
+  top: 1px;
+  cursor: pointer;
+}
+.cursor-pointer{
+  cursor: pointer;
+}

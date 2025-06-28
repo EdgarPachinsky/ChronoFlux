@@ -8,7 +8,9 @@
       <p class="mb-5">Power - <b>{{ pulsePoint.power }}</b></p>
       <p class="mb-5">Max Radius - <b>{{ pulsePoint.maxRadius }}</b></p>
       <p class="mb-5">Duration - <b>{{ pulsePoint.duration }}</b></p>
-      <p class="mb-5">Explosion Status - <b>{{ pulsePoint.isCompleted?'':'In Progress' }}</b> </p>
+      @if(pulsePoint.pulseInterval >= 500){
+        <p class="mb-5">Interval - <b>{{ pulsePoint.pulseInterval }} (ms)</b> </p>
+      }
     </div>
 
     <div class="ml-auto">

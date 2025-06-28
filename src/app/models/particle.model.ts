@@ -16,6 +16,13 @@ export interface IParticle {
   highLightError: boolean
   color: string
   mass: number
+  massUnit: 'kg' | 'g'
   category: IParticleCategory
+  gravitationalConstant: number
+  rotation: number
+  planetHasRings: boolean
+  rippleTime: number
+  type: 'regular' | 'blackHole' | 'star' | 'planet'
+  planetSubType: 'rock' | 'gas'
 }
 

@@ -14,10 +14,12 @@ export class Pulse extends SharedFunctional implements IPulse{
   // public applyOn!: Particle[] | '*'
   public isActive: boolean = false;
   public isCompleted: boolean = false;
+  public isTemporary: boolean = false;
+  public pulseInterval: number = 0;
 
   constructor(
     id = '', x: number = 0, y: number = 0, maxRadius = 0, power = 0,
-    color = '', duration = 0, currentTime = 0 , isActive = false
+    color = '', duration = 0, currentTime = 0 , isActive = false, pulseInterval = 0
   ) {
     super();
     this.id = id || this.generateSecureId(10);
@@ -30,5 +32,6 @@ export class Pulse extends SharedFunctional implements IPulse{
     this.currentTime = currentTime;
     // this.applyOn = applyOn;
     this.isActive = isActive;
+    this.pulseInterval = pulseInterval;
   }
 }

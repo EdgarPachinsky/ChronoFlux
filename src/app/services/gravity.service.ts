@@ -12,8 +12,7 @@ import {Pulse} from "../classes/Pulse";
 })
 export class GravityService {
 
-  public EPSILON = 0.001;
-
+  intervalMap: Map<string, any> = new Map();
   iteration: number = 0;
   pausedIterator: number = 0;
 
@@ -39,10 +38,30 @@ export class GravityService {
       return
     }
 
+    this.setIntervalEvents()
+
     this.startAnimation(
       particles,
       pulsePoints
     );
+  }
+
+  setIntervalEvents(){
+    let intervalPulses = this.settingsService.pulsePoints.filter((pulse) => pulse.pulseInterval && pulse.pulseInterval > 500 && pulse.isActive);
+    if(intervalPulses && intervalPulses.length){
+      for (const pulse of intervalPulses) {
+        // Avoid double interval setting
+        if (this.intervalMap.has(pulse.id)) continue;
+
+        const intervalId = setInterval(() => {
+          // Perform the action for the pulse
+          // this.triggerPulse(pulse);
+          this.canvasService.pulsePointsQueue.push(pulse)
+        }, pulse.pulseInterval);
+
+        this.intervalMap.set(pulse.id, intervalId);
+      }
+    }
   }
 
   isRestingOnFloor(particle: Particle): boolean {
@@ -52,6 +71,13 @@ export class GravityService {
     const lowHorizontalVelocity = Math.abs(particle.vx) < 0.1;
 
     return onFloor && lowVelocity && lowHorizontalVelocity;
+  }
+
+  initializeTangentialVelocity(dx:number, dy:number, r:number, asPlanet:Particle, particle:Particle){
+    let tangentialSpeed = Math.sqrt(asPlanet?.gravitationalConstant * asPlanet?.convertedMass / r); // Circular orbit speed
+
+    particle.vx = -dy / r * tangentialSpeed;
+    particle.vy = dx / r * tangentialSpeed;
   }
 
   startAnimation(particles: Particle[], pulsePoints: Pulse[] = []) {
@@ -64,36 +90,85 @@ export class GravityService {
     const animateLayout = () => {
 
       this.iteration++; // Update iteration
+
       this.pausedIterator = this.iteration; // Update paused iterator
 
       particles.forEach((particle: Particle) => {
+        // first get other particles in case if we will need to calculate impact of forces in other ones
         let otherParticles = particles.filter((_particle: Particle) => _particle.id !== particle.id)
+        // initialize default two forces as null
+        let gravityForce:Vector | null = null;
+        let airResistanceForce:Vector | null = null;
 
-        let windForce = this.getWindForce();
-        let gravityForce = this.getGravityForce(particle);
-        let airResistanceForce = this.getAirResistanceForce(particle)
+        // initialize plants gravitational force
+        let planetGravitationalForce: Vector | null = null;
 
-        this.collisionService.checkAndResolveCollision(particle, otherParticles)
+        // space simulation module
+        if(this.settingsService.isSpaceSimulationModeControl.value){
+          // check if current particle exists in planets array
+          let asPlanet:Particle | undefined = this.settingsService.planets.find((planet) => planet.id === particle.id)
+          // if yes
+          if(asPlanet){
+            otherParticles.forEach(otherParticle => {
+              // calculate distance between
+              let dx = particle?.x - otherParticle.x;
+              let dy = particle?.y - otherParticle.y;
+              let r = Math.sqrt(dx * dx + dy * dy);
+              // calculate gravitational force
+              let force = asPlanet?.gravitationalConstant * asPlanet?.convertedMass * otherParticle.convertedMass / (r * r);
+              // initialize force vector
+              planetGravitationalForce = new Vector(
+                'gravitational',
+                (dx / r) * force,
+                (dy / r) * force,
+                '#ffcc00',
+                'Gravitational Force'
+              );
+              // calculate impact vx and vy
+              otherParticle.vx += planetGravitationalForce.x / otherParticle.convertedMass;
+              otherParticle.vy += planetGravitationalForce.y / otherParticle.convertedMass;
 
-        let { customForcesXSum, customForcesYSum } = this.getAllCustomForcesXYComponentSum();
+              // add in forces array
+              otherParticle.forceVectors = [planetGravitationalForce]
+              // calculate Tangential Velocity to keep planet in orbit
+              this.initializeTangentialVelocity(dx, dy, r, asPlanet, otherParticle)
+            })
+          }
+        }
+        // if not in space simulation mode , then get gravity and air resistance force vectors
+        else{
+
+          // if default gravity force is activated
+          if(this.settingsService.gravityStatusControl.value)
+            gravityForce = this.getGravityForce(particle);
+
+          // if default air resistance force is activated
+          if(this.settingsService.airResistanceStatusControl.value)
+            airResistanceForce = this.getAirResistanceForce(particle);
+        }
+
+
+        let pulseImpactForcesExists:Vector[] = particle.forceVectors.filter((force: Vector) => force.id.startsWith('pulseImpact'));
+
+        let defaultForceVectors:Array<Vector | null> = [gravityForce, airResistanceForce];
+
+        let { defaultForcesXSum, defaultForcesYSum } = this.getAllDefaultForcesXYComponentSum(defaultForceVectors);
+        let { customForcesXSum, customForcesYSum } = this.getAllCustomForcesXYComponentSum(pulseImpactForcesExists || []);
+
+        let planetGravitationalForceExists:Vector | undefined = particle.forceVectors.find((force: Vector) => force.id === 'gravitational');
+
         let totalForce = new Vector(
           'total',
-
-          (!!this.settingsService.airResistanceStatusControl.value?airResistanceForce.x:0) +
-             (!!this.settingsService.gravityStatusControl.value?gravityForce.x:0) +
-             (!!this.settingsService.windForceStatusControl.value?windForce.x:0) + customForcesXSum,
-
-          (!!this.settingsService.airResistanceStatusControl.value?airResistanceForce.y:0) +
-             (!!this.settingsService.gravityStatusControl.value?gravityForce.y:0) +
-             (!!this.settingsService.windForceStatusControl.value?windForce.y:0) + customForcesYSum,
-
-          String(this.settingsService.totalForceColorControl.value), 'F Total Force'
+          defaultForcesXSum + customForcesXSum + (planetGravitationalForceExists?.x || 0),
+          defaultForcesYSum + customForcesYSum + (planetGravitationalForceExists?.y || 0),
+          String(this.settingsService.totalForceColorControl.value),
+          'F Total Force'
         )
 
         particle.forceVectors = [
-          ...(!!this.settingsService.gravityStatusControl.value ? [gravityForce] : []),
-          ...(!!this.settingsService.airResistanceStatusControl.value ? [airResistanceForce] : []),
-          ...(!!this.settingsService.windForceStatusControl.value ? [windForce] : []),
+          ...defaultForceVectors.filter((v): v is Vector => v !== null),
+          ...(pulseImpactForcesExists.length > 0) ? [...pulseImpactForcesExists]: [],
+          ...planetGravitationalForceExists ? [planetGravitationalForceExists]: [],
           ...this.settingsService.customForces.length ? [...this.getAllCustomForces()] : [],
           totalForce,
         ]
@@ -109,20 +184,28 @@ export class GravityService {
         particle.x += particle.vx * Number(this.settingsService.deltaTimeControl.value);
         particle.y += particle.vy * Number(this.settingsService.deltaTimeControl.value);
 
-        this.settingsService.particlePositionFix(particle);
+        particle.speed = this.getParticleSpeed(particle)
+
+        this.collisionService.checkAndResolveCollision(particle, otherParticles);
+
+        if(!this.settingsService.isSpaceSimulationModeControl.value)
+          this.settingsService.particlePositionFixCloseToBorders(particle);
       })
       this.canvasService.drawParticlesOnCanvas(particles, this.settingsService.pulsePoints);
-
+      // this.canvasService.drawRipples(particles)
       this.animationId = requestAnimationFrame(animateLayout);
     };
 
     this.animationId = requestAnimationFrame(animateLayout);
   }
 
-  getAllCustomForcesXYComponentSum(){
+  getAllCustomForcesXYComponentSum(additionalForces: Vector[] = []){
     let customForcesXSum = 0;
     let customForcesYSum = 0;
-    this.settingsService.customForces.forEach((customForce) => {
+
+    let allForces = [...additionalForces, ...this.settingsService.customForces]
+
+    allForces.forEach((customForce) => {
       if(!customForce.isActive){
         return
       }
@@ -134,33 +217,50 @@ export class GravityService {
     return {customForcesXSum, customForcesYSum}
   }
 
+  getAllDefaultForcesXYComponentSum(
+    defaultForces: Array<Vector | null>
+  ){
+    let defaultForcesXSum = 0;
+    let defaultForcesYSum = 0;
+
+
+
+    defaultForces.forEach((force: Vector | null) => {
+      if(!force){
+        return
+      }
+
+      defaultForcesXSum += force.x;
+      defaultForcesYSum += force.y;
+    })
+
+    return {defaultForcesXSum, defaultForcesYSum}
+  }
+
   getAllCustomForces(){
     return this.settingsService.customForces.filter((customForce:Vector) => customForce.isActive) || []
   }
 
-  getWindForce(){
-    return new Vector('wind', 5000, -5000, String(this.settingsService.windForceColorControl.value), 'F Wind');
-  }
 
   getGravityForce(particle:Particle){
     return new Vector('gravity',0, 9.8 * particle.convertedMass, String(this.settingsService.gravityColorControl.value), 'F Gravity')
   }
 
   getAirResistanceForce(particle:Particle){
-    // particle speed magnitude of velocity vector
-    let speed = Math.sqrt( Math.pow(particle.vx, 2) + Math.pow(particle.vy, 2) )
-    particle.speed = speed;
-
     // Using quadratic drag: F_drag_magnitude = k * speed^2
-    let dragMagnitude = 2 * Math.pow(speed, 2);
+    let dragMagnitude = 2 * Math.pow(particle.speed, 2);
     let dragX = 0;
     let dragY = 0;
-    if(speed > 0){
-      dragX = -dragMagnitude * (particle.vx / speed);
-      dragY = -dragMagnitude * (particle.vy / speed);
+    if(particle.speed > 0){
+      dragX = -dragMagnitude * (particle.vx / particle.speed);
+      dragY = -dragMagnitude * (particle.vy / particle.speed);
     }
 
     return new Vector('air_resistance', dragX, dragY, String(this.settingsService.airResistanceColorControl.value), 'F Air Resistance');
+  }
+
+  getParticleSpeed(particle: Particle){
+    return Math.sqrt( Math.pow(particle.vx, 2) + Math.pow(particle.vy, 2) )
   }
 
   pauseGravityAnimation() {
