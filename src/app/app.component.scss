@@ -11,3 +11,23 @@
     }
   }
 }
+
+.instructions-container{
+  position: fixed;
+  z-index: 1;
+  color: white;
+  right: 5px;
+  bottom: 5px;
+  padding: 5px 10px;
+  background-color: #222222;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.3s;
+  width: 24px;
+  height: 24px;
+
+  &:hover{
+    color: rgb(239 169 161);
+    transition: 0.3s;
+  }
+}

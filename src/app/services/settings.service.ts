@@ -187,6 +187,12 @@ export class SettingsService {
     }
   }
 
+  deleteParticle(particleToDelete: Particle){
+    this.particles = this.particles.filter((particle) => particle.id !== particleToDelete.id);
+    this.saveToLocalStorage();
+    this.canvasService.drawParticlesOnCanvas(this.particles, this.pulsePoints);
+  }
+
   handleCanvasClick(
       event: MouseEvent | undefined = undefined,
       pointsFromRandomGenerator: IParticle | undefined = undefined
@@ -228,9 +234,7 @@ export class SettingsService {
     }
 
     if(this.isShiftKeyPressed && onParticle){
-      this.particles = this.particles.filter((particle) => particle.id !== onParticle.id);
-      this.saveToLocalStorage();
-      this.canvasService.drawParticlesOnCanvas(this.particles, this.pulsePoints);
+      this.deleteParticle(onParticle)
       return;
     }
 
@@ -302,7 +306,12 @@ export class SettingsService {
     let localParticles = localStorage.getItem('particles');
     if(localParticles){
       this.particles = JSON.parse(localParticles);
+      let maxId = 0;
       this.particles = this.particles.map((particle) => {
+        if(particle.id > maxId){
+          maxId = particle.id;
+        }
+
         return new Particle(
           particle.id,
           particle.x,
@@ -320,7 +329,7 @@ export class SettingsService {
       })
 
       this.canvasService.drawParticlesOnCanvas(this.particles, this.pulsePoints)
-      this.counter = this.particles.length + 1;
+      this.counter = maxId + 1;
     }
   }
 

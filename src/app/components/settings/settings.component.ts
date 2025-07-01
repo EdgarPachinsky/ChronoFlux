@@ -154,8 +154,7 @@ export class SettingsComponent implements OnInit, OnDestroy{
         }
       })
     )
-
-
+    
     this.setCanvasDimensions();
     window.addEventListener('resize', this.setCanvasDimensions.bind(this));
   }

@@ -492,28 +492,40 @@
     @for (particle of settingsService.particles; track particle.id) {
       <div class="particle-card d-flex flex-row align-items-center mb-5 board p-10">
 
-        <div class=" particle-grid-container">
-          <div class="grid-component x">
-            <div class="label x">x</div>
-          </div>
-          <div class="grid-component y">
-            <div class="label y">y</div>
-          </div>
+        <div class="d-flex flex-column">
+          <div class=" particle-grid-container">
+            <div class="grid-component x">
+              <div class="label x">x</div>
+            </div>
+            <div class="grid-component y">
+              <div class="label y">y</div>
+            </div>
 
-          <div class="particle">
-            <div class="particle-id"><b>{{ particle.id }}</b></div>
+            <div class="particle">
+              <div class="particle-id"><b>{{ particle.id }}</b></div>
 
-            @for (force of particle.forceVectors; track force.forceName) {
-              @if (force.showArrowInMiniParticle) {
-                <div class="force-arrow"
-                     [style.width.px]="35"
-                     [style.background-color]="force.color"
-                     [style.transform]="'rotate(' + (force.angle * 180 / Math.PI) + 'deg)'">
-                  <div class="arrowhead-right-part" [style.border-top-color]="'white'"></div>
-                  <div class="arrowhead-left-part" [style.border-top-color]="'white'"></div>
-                </div>
+              @for (force of particle.forceVectors; track force.forceName) {
+                @if (force.showArrowInMiniParticle) {
+                  <div class="force-arrow"
+                       [style.width.px]="35"
+                       [style.background-color]="force.color"
+                       [style.transform]="'rotate(' + (force.angle * 180 / Math.PI) + 'deg)'">
+                    <div class="arrowhead-right-part" [style.border-top-color]="'white'"></div>
+                    <div class="arrowhead-left-part" [style.border-top-color]="'white'"></div>
+                  </div>
+                }
               }
-            }
+            </div>
+
+
+          </div>
+          <div class="mt-5 d-flex justify-content-center">
+            <button
+              (click)="settingsService.deleteParticle(particle)"
+              [disabled]="gravityService.isPlaying"
+              mat-button="elevated">Delete
+              <mat-icon>close</mat-icon>
+            </button>
           </div>
         </div>
 
@@ -603,7 +615,6 @@
 
           </div>
         </div>
-
       </div>
     }
   </div>
